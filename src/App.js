@@ -48,8 +48,8 @@ function App() {
             if (clientRect == null || isCollapsed) return null
             const style = css`
               position: absolute;
-              left: ${clientRect.left + clientRect.width / 2}px;
-              top: ${clientRect.top - 40}px;
+              left: ${isQuickSearch ? clientRect.right + clientRect.width : clientRect.left + clientRect.width}px;
+              top: ${clientRect.top - 60}px;
               margin-left: -75px;
               background: gray;
               font-size: 14px;
@@ -69,6 +69,31 @@ function App() {
               min-width: 90px;
               border-radius: 5px;
               width: auto;
+              
+              ${!isQuickSearch ? `
+              &:before {
+                content: "";
+                position: absolute;
+                top: 100%;
+                left: 50%;
+                margin-left: -10px;
+                border-width: 10px;
+                border-style: solid;
+                border-color: white transparent transparent transparent;
+              }
+              ` : `
+              &:before {
+                content: "";
+                position: absolute;
+                top: 40%;
+                right: 100%;
+                margin-top: -10px;
+                border-width: 10px;
+                border-style: solid;
+                border-color: transparent white transparent transparent;
+              }`
+              }
+
             `
             const iconButtonStyle = css`
               background: none;
