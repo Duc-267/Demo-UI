@@ -4,12 +4,15 @@ import { Popover } from "react-text-selection-popover";
 import { css } from '@emotion/css'
 import audio from './audio.png'
 import marker from './marker.png'
+import notes from './notes.png'
 import magnifyingGlass from './magnifying-glass.png'
 
 function App() {
   const [text, setText] = React.useState('')
-  const [isQuickSearch, setIsQuickSearch] = React.useState(false)
+  // const [isQuickSearch, setIsQuickSearch] = React.useState(false)
+  const [toolTipType, setTooltipType] = React.useState('normal')
   const [quickSearchText, setQuickSearchText] = React.useState('')
+  console.log("🚀 ~ file: App.js:14 ~ App ~ quickSearchText:", quickSearchText)
 
   function handleTextChange(text) {
     setText(text)
@@ -25,10 +28,15 @@ function App() {
     }
     const regex = new RegExp(`(${escapeRegExp(highlight)})`, 'gi')
     const parts = text.split(regex)
+    const style = css`
+      background-color: ${toolTipType !== 'note' ? 'yellow' : 'blue'};
+      color: ${toolTipType !== 'note' ? 'black' : 'white'};
+    `
+
     return (
       <span>
          {parts.filter(part => part).map((part, i) => (
-             regex.test(part) ? <mark key={i}>{part}</mark> : <span key={i}>{part}</span>
+             regex.test(part) ? <mark className={style} key={i} >{part}</mark> : <span key={i}>{part}</span>
          ))}
      </span>
     )
@@ -43,13 +51,18 @@ function App() {
         render={
           ({ clientRect, isCollapsed, textContent }) => {
             if (isCollapsed) {
-              setIsQuickSearch(false)
+              if (toolTipType === 'note') {
+                console.log("🚀 ~ file: App.js:49 ~ App ~ toolTipType:", toolTipType)
+                handleTextChange('')
+              }
+              setTooltipType('normal')
+              
             }
-            if (clientRect == null || isCollapsed) return null
+            if ((clientRect == null || isCollapsed)) return null
             const style = css`
               position: absolute;
-              left: ${isQuickSearch ? clientRect.right + clientRect.width : clientRect.left + clientRect.width}px;
-              top: ${clientRect.top - 60}px;
+              left: ${toolTipType === 'quickSearch' ? clientRect.right + clientRect.width : clientRect.left + clientRect.width / 2}px;
+              top: ${clientRect.top - 70}px;
               margin-left: -75px;
               background: gray;
               font-size: 14px;
@@ -58,7 +71,7 @@ function App() {
               border-radius: 3px;
               font-size: 14px;
               max-width: 200px;
-              z-index: 22147483647;
+              z-index: 1000;
               color: rgb(15, 33, 73);
               opacity: 0.97;
               background-color: white;
@@ -70,7 +83,7 @@ function App() {
               border-radius: 5px;
               width: auto;
               
-              ${!isQuickSearch ? `
+              ${!(toolTipType === 'quickSearch') ? `
               &:before {
                 content: "";
                 position: absolute;
@@ -107,7 +120,7 @@ function App() {
                 background: #E5E5E5;
               }
             `
-            if (isQuickSearch) {
+            if (toolTipType === 'quickSearch') {
               return (
                 <div className={style}>
                   <div style={
@@ -146,16 +159,53 @@ function App() {
                   </p>
                 </div>
               )
-
+            }
+            if (toolTipType === 'note') {
+              // clear event listener
+              return (
+                <div className={style}>
+                  <div style={
+                    {
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      paddingLeft: '10px',
+                      paddingRight: '10px',
+                      cursor: 'none'
+                    }
+                  }>
+                  </div>
+                  <textarea style={
+                    {
+                      border: 'none',
+                      outline: 'none',
+                      fontSize: '14px',
+                      marginBottom: '10px',
+                      color: '#2F2D36',
+                      paddingLeft: '10px',
+                      paddingRight: '10px',
+                      zIndex: '22147483647412123',
+                      resize: 'none',
+                    }
+                  } placeholder='Add a note' onFocus={() => {}}/>
+                </div>
+              )
             }
             return <div className={style}>
               <img className={iconButtonStyle} src={marker} onClick={() => {handleTextChange(textContent)}}/>
+              <img 
+                className={iconButtonStyle}
+                src={notes} 
+                onClick={() => {
+                  setTooltipType('note')
+                  handleTextChange(textContent)
+                }}/>
 
               <img 
               src={magnifyingGlass}
               className={iconButtonStyle}
               onClick={() => {
-                setIsQuickSearch(true)
+                setTooltipType('quickSearch')
                 setQuickSearchText(textContent)
               }}/>
             </div>
