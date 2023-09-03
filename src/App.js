@@ -6,13 +6,17 @@ import audio from './audio.png'
 import marker from './marker.png'
 import notes from './notes.png'
 import magnifyingGlass from './magnifying-glass.png'
+import { BlockPicker  } from 'react-color';
 
 function App() {
   const [text, setText] = React.useState('')
   // const [isQuickSearch, setIsQuickSearch] = React.useState(false)
   const [toolTipType, setTooltipType] = React.useState('normal')
   const [quickSearchText, setQuickSearchText] = React.useState('')
-  console.log("🚀 ~ file: App.js:14 ~ App ~ quickSearchText:", quickSearchText)
+  const [color, setColor] = React.useState('#fff')
+  const [showColorPicker, setShowColorPicker] = React.useState(false)
+  const [colorPickerElement, setColorPickerElement] = React.useState({left: 0, top: 0})
+  const colorPickerRef = React.useRef(null)
 
   function handleTextChange(text) {
     setText(text)
@@ -29,7 +33,7 @@ function App() {
     const regex = new RegExp(`(${escapeRegExp(highlight)})`, 'gi')
     const parts = text.split(regex)
     const style = css`
-      background-color: ${toolTipType !== 'note' ? 'yellow' : 'blue'};
+      background-color: ${toolTipType !== 'note' ? color : 'blue'};
       color: ${toolTipType !== 'note' ? 'black' : 'white'};
     `
 
@@ -42,11 +46,40 @@ function App() {
     )
  }
 
+  React.useEffect(() => {
+    function handleClickOutside(event) {
+      if (colorPickerRef.current && !colorPickerRef.current.contains(event.target)) {
+        setShowColorPicker(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [colorPickerRef]);
+
 
   return (
     <div className="App">
       <div className='Container'>
       <Highlighted text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." highlight={text} />
+      { showColorPicker ?
+        <div style={
+          {
+            position: 'absolute',
+            left: colorPickerElement.left,
+            top: colorPickerElement.top,
+            zIndex: '999'
+          }
+        }
+        ref={colorPickerRef}
+        >
+          <BlockPicker
+            color={ color }
+            onChangeComplete={ (color) => {setColor(color.hex)} }
+          />
+        </div> : null
+        }
       <Popover
         render={
           ({ clientRect, isCollapsed, textContent }) => {
@@ -62,7 +95,7 @@ function App() {
             const style = css`
               position: absolute;
               left: ${toolTipType === 'quickSearch' ? clientRect.right + clientRect.width : clientRect.left + clientRect.width / 2}px;
-              top: ${clientRect.top - 70}px;
+              top: ${toolTipType === 'note' ? clientRect.top - 140 : clientRect.top - 70}px;
               margin-left: -75px;
               background: gray;
               font-size: 14px;
@@ -82,6 +115,8 @@ function App() {
               min-width: 90px;
               border-radius: 5px;
               width: auto;
+              background: ${toolTipType === 'note' ? '#AFDC35' : 'white'};
+              
               
               ${!(toolTipType === 'quickSearch') ? `
               &:before {
@@ -108,6 +143,7 @@ function App() {
               }
 
             `
+
             const iconButtonStyle = css`
               background: none;
               width: 20px;
@@ -181,18 +217,29 @@ function App() {
                       outline: 'none',
                       fontSize: '14px',
                       marginBottom: '10px',
+                      marginTop: '10px',
                       color: '#2F2D36',
                       paddingLeft: '10px',
                       paddingRight: '10px',
                       zIndex: '22147483647412123',
                       resize: 'none',
+                      height: '100px',
+                      backgroundColor: '#AFDC35',
                     }
-                  } placeholder='Add a note' onFocus={() => {}}/>
+                  } placeholder='Add a note'/>
                 </div>
               )
             }
             return <div className={style}>
-              <img className={iconButtonStyle} src={marker} onClick={() => {handleTextChange(textContent)}}/>
+              <img 
+              className={iconButtonStyle} 
+              src={marker} 
+              onClick={() => {
+                handleTextChange(textContent)
+                setShowColorPicker(true)
+                setColorPickerElement({left:  clientRect.left + clientRect.width / 3 , top: clientRect.top + 30})
+              }}
+              />
               <img 
                 className={iconButtonStyle}
                 src={notes} 
