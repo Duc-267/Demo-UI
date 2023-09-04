@@ -116,6 +116,7 @@ function App() {
               border-radius: 5px;
               width: auto;
               background: ${toolTipType === 'note' ? '#AFDC35' : 'white'};
+
               
               
               ${!(toolTipType === 'quickSearch') ? `
@@ -140,6 +141,20 @@ function App() {
                 border-style: solid;
                 border-color: transparent white transparent transparent;
               }`
+              }
+              
+              ${toolTipType === 'note' && `
+              &:before {
+                content: "";
+                position: absolute;
+                top: 100%;
+                left: 50%;
+                margin-left: -10px;
+                border-width: 10px;
+                border-style: solid;
+                border-color: #AFDC35 transparent transparent transparent;
+              }
+              `
               }
 
             `
