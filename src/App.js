@@ -62,7 +62,7 @@ function App() {
   return (
     <div className="App">
       <div className='Container'>
-      <Highlighted text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." highlight={text} />
+      <Highlighted text="Dummy text refers to the bits of content that are used to fill a website mock-up. This text helps web designers better envision how the website will look as a finished product. It is important to understand that dummy text has no meaning whatsoever. Its sole purpose is to fill out blank spaces with “word-like” content, without making any copyright infringements." highlight={text} />
       { showColorPicker ?
         <div style={
           {
@@ -143,19 +143,6 @@ function App() {
               }`
               }
               
-              ${toolTipType === 'note' && `
-              &:before {
-                content: "";
-                position: absolute;
-                top: 100%;
-                left: 50%;
-                margin-left: -10px;
-                border-width: 10px;
-                border-style: solid;
-                border-color: #AFDC35 transparent transparent transparent;
-              }
-              `
-              }
 
             `
 
