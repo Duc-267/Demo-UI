@@ -85,7 +85,6 @@ function App() {
           ({ clientRect, isCollapsed, textContent }) => {
             if (isCollapsed) {
               if (toolTipType === 'note') {
-                console.log("🚀 ~ file: App.js:49 ~ App ~ toolTipType:", toolTipType)
                 handleTextChange('')
               }
               setTooltipType('normal')
@@ -169,6 +168,16 @@ function App() {
               }
             `
             if (toolTipType === 'quickSearch') {
+              const linkStyle = css`
+                font-size: 14px;
+                color: #2F2D36;
+                cursor: pointer;
+                text-decoration: none;
+                :hover {
+                  color: #CC00FF;
+                }
+
+              `
               return (
                 <div className={style}>
                   <div style={
@@ -201,9 +210,20 @@ function App() {
                       marginBottom: '10px',
                       color: '#2F2D36',
                       paddingLeft: '10px',
-                      paddingRight: '10px'
+                      paddingRight: '10px',
+                      textDecoration: 'none'
                     }
-                  }>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut .
+                  }>Lorem ipsum dolor sit amet, 
+                  <a 
+                  className={linkStyle} 
+                  href='https://www.figma.com/proto/GVLHyXzZ9qfowTl6nVJnSJ/Dictionary?type=design&node-id=494-1048&t=VuoXwPq5543QSI8W-0&scaling=min-zoom&page-id=0%3A1&starting-point-node-id=301%3A433'
+                  // open in new tab
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >
+                    &nbsp;Key&nbsp; 
+                  </a>
+                  consectetur adipiscing elit, sed do eiusmod tempor incididunt ut .
                   </p>
                 </div>
               )
