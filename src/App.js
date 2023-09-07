@@ -10,40 +10,84 @@ import { BlockPicker  } from 'react-color';
 
 function App() {
   const [text, setText] = React.useState('')
-  // const [isQuickSearch, setIsQuickSearch] = React.useState(false)
   const [toolTipType, setTooltipType] = React.useState('normal')
   const [quickSearchText, setQuickSearchText] = React.useState('')
   const [color, setColor] = React.useState('#fff')
   const [showColorPicker, setShowColorPicker] = React.useState(false)
   const [colorPickerElement, setColorPickerElement] = React.useState({left: 0, top: 0})
   const colorPickerRef = React.useRef(null)
+  const [highlightedText, setHighlightedText] = React.useState([])
 
   function handleTextChange(text) {
     setText(text)
   }
 
   const escapeRegExp = (str = '') => (
-    str.replace(/([.?*+^$[\]\\(){}|-])/g, '\\$1')
+    // clear spaces\
+    str.trim().replace(/([.?*+^$[\]\\(){}|-])/g, '\\$1')
   );
 
-  const Highlighted = ({text = '', highlight = ''}) => {
-    if (!highlight.trim()) {
-      return <span>{text}</span>
-    }
-    const regex = new RegExp(`(${escapeRegExp(highlight)})`, 'gi')
-    const parts = text.split(regex)
-    const style = css`
-      background-color: ${toolTipType !== 'note' ? color : 'blue'};
-      color: ${toolTipType !== 'note' ? 'black' : 'white'};
-    `
+  const Highlighted =  ({currentText = ''}) => {
 
+    if (!highlightedText.length && !text) {
+      return <span>{currentText}</span>
+    }
+    const getCurrentText = (text) => {
+      const regex = new RegExp(`(${escapeRegExp(text)})`, 'gi')
+      const style = css`
+        padding: px 0px;
+        background-color: #3367D1;
+        color: white;
+      `
+      return {
+        regex,
+        style
+      }
+    }
+    const getHighlightedText = (text, color) => {
+      const regex = new RegExp(`(${escapeRegExp(text)})`, 'gi')
+      const style = css`
+        padding: px 0px;
+        background-color: ${color};
+        color: black;
+      `
+      return {
+        regex,
+        style
+      }
+    }
+    const texts = highlightedText.map((highlight) => {
+      return getHighlightedText(highlight.text, highlight.color)
+    })
+    // add the current text to the list of texts
+    if (text) {
+      texts.push(getCurrentText(text))
+    }
+    //spit all the parts by the regex
+    const regex = new RegExp(`(${texts.map(text => text.regex.source).join('|')})`, 'gi')
+    const parts = currentText.split(regex)
+    const reducedParts = parts.reduce((acc, part) => {
+      if (part === undefined) return acc
+      if (part === '') return acc
+      if (acc.length === 0) return [part]
+      const lastPart = acc[acc.length - 1]
+      if (lastPart === part) return acc
+      return [...acc, part]
+    }
+    , [])
     return (
       <span>
-         {parts.filter(part => part).map((part, i) => (
-             regex.test(part) ? <mark className={style} key={i} >{part}</mark> : <span key={i}>{part}</span>
-         ))}
-     </span>
+          {reducedParts.filter(part => part).map((part, i) => {
+            const text = texts.find(text => text.regex.test(part))
+            if (text) {
+              return <mark className={text.style} key={i} >{part}</mark>
+            }
+            return <span key={i}>{part}</span>
+          }
+          )}
+      </span>
     )
+
  }
 
   React.useEffect(() => {
@@ -62,7 +106,7 @@ function App() {
   return (
     <div className="App">
       <div className='Container'>
-      <Highlighted text="Dummy text refers to the bits of content that are used to fill a website mock-up. This text helps web designers better envision how the website will look as a finished product. It is important to understand that dummy text has no meaning whatsoever. Its sole purpose is to fill out blank spaces with “word-like” content, without making any copyright infringements." highlight={text} />
+      <Highlighted currentText="Dummy text refers to the bits of content that are used to fill a website mock-up. This text helps web designers better envision how the website will look as a finished product. It is important to understand that dummy text has no meaning whatsoever. Its sole purpose is to fill out blank spaces with “word-like” content, without making any copyright infringements." />
       { showColorPicker ?
         <div style={
           {
@@ -76,7 +120,14 @@ function App() {
         >
           <BlockPicker
             color={ color }
-            onChangeComplete={ (color) => {setColor(color.hex)} }
+            
+            onChangeComplete={ (color) => 
+            {
+              setHighlightedText([...highlightedText, {text: text, color: color.hex}])
+              setShowColorPicker(false)
+              setColor('#fff')
+            } 
+            }
           />
         </div> : null
         }
